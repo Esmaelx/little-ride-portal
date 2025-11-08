@@ -121,7 +121,7 @@ router.get('/queue', auth, isOperationsOrAdmin, async (req, res) => {
 
         const [documents, total] = await Promise.all([
             Document.find(query)
-                .populate('driver', 'personalInfo vehicleInfo status')
+                .populate('driver', 'driverInfo status')
                 .populate('uploadedBy', 'name')
                 .sort({ createdAt: -1 })
                 .skip(skip)

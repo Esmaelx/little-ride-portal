@@ -115,3 +115,24 @@
         flex: 1;
     }
 }
+
+/* Code Badge */
+.code-badge {
+    background: var(--bg-light);
+    padding: 4px 10px;
+    border-radius: var(--radius);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* Registration Status Badges */
+.badge-registration {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-reactivation {
+    background-color: #fef3c7;
+    color: #92400e;
+}

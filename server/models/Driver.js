@@ -1,25 +1,19 @@
 const mongoose = require('mongoose');
 
 const driverSchema = new mongoose.Schema({
-    // Personal Information
-    personalInfo: {
-        firstName: {
+    // Driver Information (matches Sheet1.html)
+    driverInfo: {
+        name: {
             type: String,
-            required: [true, 'First name is required'],
+            required: [true, 'Driver name is required'],
             trim: true,
-            maxlength: [50, 'First name cannot exceed 50 characters']
-        },
-        lastName: {
-            type: String,
-            required: [true, 'Last name is required'],
-            trim: true,
-            maxlength: [50, 'Last name cannot exceed 50 characters']
+            maxlength: [100, 'Name cannot exceed 100 characters']
         },
         phone: {
             type: String,
             required: [true, 'Phone number is required'],
             trim: true,
-            match: [/^(\+251|0)?[97]\d{8}$/, 'Please enter a valid Ethiopian phone number']
+            match: [/^(251)?[79]\d{8}$/, 'Please enter a valid phone number (e.g., 251912345678)']
         },
         email: {
             type: String,
@@ -27,50 +21,26 @@ const driverSchema = new mongoose.Schema({
             lowercase: true,
             sparse: true
         },
-        address: {
-            city: { type: String, default: 'Addis Ababa' },
-            subcity: String,
-            woreda: String,
-            kebele: String
-        },
-        dateOfBirth: {
-            type: Date
-        },
-        nationalId: {
+        code: {
             type: String,
-            trim: true
-        }
-    },
-
-    // Vehicle Information
-    vehicleInfo: {
+            trim: true,
+            maxlength: [10, 'Code cannot exceed 10 characters']
+        },
         plateNumber: {
             type: String,
-            required: [true, 'Vehicle plate number is required'],
+            required: [true, 'Plate number is required'],
             uppercase: true,
             trim: true
         },
-        make: {
+        registrationStatus: {
             type: String,
-            trim: true
+            enum: ['registration', 'reactivation'],
+            default: 'registration'
         },
-        model: {
+        tinNo: {
             type: String,
-            trim: true
-        },
-        year: {
-            type: Number,
-            min: [1990, 'Vehicle year must be 1990 or later'],
-            max: [new Date().getFullYear() + 1, 'Invalid vehicle year']
-        },
-        color: {
-            type: String,
-            trim: true
-        },
-        vehicleType: {
-            type: String,
-            enum: ['sedan', 'suv', 'minibus', 'bajaj', 'motorcycle'],
-            default: 'sedan'
+            trim: true,
+            maxlength: [20, 'TIN number cannot exceed 20 characters']
         }
     },
 
@@ -130,12 +100,12 @@ const driverSchema = new mongoose.Schema({
 // Indexes for common queries
 driverSchema.index({ status: 1, createdAt: -1 });
 driverSchema.index({ registeredBy: 1, createdAt: -1 });
-driverSchema.index({ 'personalInfo.phone': 1 });
-driverSchema.index({ 'vehicleInfo.plateNumber': 1 });
+driverSchema.index({ 'driverInfo.phone': 1 });
+driverSchema.index({ 'driverInfo.plateNumber': 1 });
 
-// Virtual for full name
+// Virtual for display name (for backward compatibility)
 driverSchema.virtual('fullName').get(function () {
-    return `${this.personalInfo.firstName} ${this.personalInfo.lastName}`;
+    return this.driverInfo.name;
 });
 
 // Ensure virtuals are included in JSON

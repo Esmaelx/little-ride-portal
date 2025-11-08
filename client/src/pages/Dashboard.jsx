@@ -276,9 +276,9 @@ function Dashboard() {
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Driver</th>
-                                    <th>Phone</th>
-                                    <th>Vehicle</th>
+                                    <th>Name 🧑‍💼</th>
+                                    <th>Mobile 📱</th>
+                                    <th>Plate 🚗</th>
                                     <th>Status</th>
                                     <th>Date</th>
                                 </tr>
@@ -293,17 +293,19 @@ function Dashboard() {
                                                 </div>
                                                 <div>
                                                     <div className="driver-name">
-                                                        {driver.personalInfo.firstName} {driver.personalInfo.lastName}
+                                                        {driver.driverInfo?.name}
                                                     </div>
                                                     <div className="driver-plate">
-                                                        {driver.vehicleInfo.plateNumber}
+                                                        {driver.driverInfo?.plateNumber}
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{driver.personalInfo.phone}</td>
+                                        <td>{driver.driverInfo?.phone}</td>
                                         <td>
-                                            {driver.vehicleInfo.make} {driver.vehicleInfo.model}
+                                            <code className="plate-number">
+                                                {driver.driverInfo?.plateNumber}
+                                            </code>
                                         </td>
                                         <td>{getStatusBadge(driver.status)}</td>
                                         <td className="text-muted">

@@ -43,7 +43,7 @@ const createAuditLog = (action, entityType) => {
 // Generate human-readable descriptions
 function getDescription(action, entityType, data) {
     const entityName = data?.data?.name ||
-        data?.data?.personalInfo?.firstName ||
+        data?.data?.driverInfo?.name ||
         data?.data?.email ||
         'item';
 

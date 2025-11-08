@@ -146,12 +146,13 @@ function Drivers() {
                             <table className="table">
                                 <thead>
                                     <tr>
-                                        <th>Driver</th>
-                                        <th>Phone</th>
-                                        <th>Vehicle</th>
-                                        <th>Plate Number</th>
-                                        <th>Status</th>
-                                        <th>Registered</th>
+                                        <th>Name 🧑‍💼</th>
+                                        <th>Mobile 📱</th>
+                                        <th>Code 🔢</th>
+                                        <th>Plate 🚗</th>
+                                        <th>Status 🖊️♻️</th>
+                                        <th>Registered By 🖊️</th>
+                                        <th>Date</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -165,29 +166,37 @@ function Drivers() {
                                                     </div>
                                                     <div>
                                                         <div className="driver-name">
-                                                            {driver.personalInfo.firstName} {driver.personalInfo.lastName}
+                                                            {driver.driverInfo?.name}
                                                         </div>
-                                                        {driver.personalInfo.email && (
+                                                        {driver.driverInfo?.email && (
                                                             <div className="driver-email text-muted text-sm">
-                                                                {driver.personalInfo.email}
+                                                                {driver.driverInfo.email}
                                                             </div>
                                                         )}
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>{driver.personalInfo.phone}</td>
+                                            <td>{driver.driverInfo?.phone}</td>
                                             <td>
-                                                <span className="vehicle-info">
-                                                    {driver.vehicleInfo.make} {driver.vehicleInfo.model}
-                                                    {driver.vehicleInfo.year && ` (${driver.vehicleInfo.year})`}
-                                                </span>
+                                                {driver.driverInfo?.code && (
+                                                    <span className="code-badge">{driver.driverInfo.code}</span>
+                                                )}
                                             </td>
                                             <td>
                                                 <code className="plate-number">
-                                                    {driver.vehicleInfo.plateNumber}
+                                                    {driver.driverInfo?.plateNumber}
                                                 </code>
                                             </td>
-                                            <td>{getStatusBadge(driver.status)}</td>
+                                            <td>
+                                                <span className={`badge badge-${driver.driverInfo?.registrationStatus || 'registration'}`}>
+                                                    {driver.driverInfo?.registrationStatus === 'reactivation'
+                                                        ? 'Reactivation ♻️'
+                                                        : 'Registration 🖊️'}
+                                                </span>
+                                            </td>
+                                            <td className="text-sm">
+                                                {driver.registeredBy?.name || 'Unknown'}
+                                            </td>
                                             <td className="text-muted text-sm">
                                                 {new Date(driver.createdAt).toLocaleDateString()}
                                             </td>

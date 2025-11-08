@@ -24,7 +24,7 @@ router.post('/', auth, isSalesAgent, async (req, res) => {
             action: 'create',
             entityType: 'driver',
             entityId: driver._id,
-            description: `Registered new driver: ${driver.personalInfo.firstName} ${driver.personalInfo.lastName}`,
+            description: `Registered new driver: ${driver.driverInfo.name}`,
             performedBy: req.userId,
             performedByName: req.user.name,
             performedByRole: req.user.role,
@@ -77,10 +77,11 @@ router.get('/', auth, async (req, res) => {
         // Search
         if (search) {
             query.$or = [
-                { 'personalInfo.firstName': { $regex: search, $options: 'i' } },
-                { 'personalInfo.lastName': { $regex: search, $options: 'i' } },
-                { 'personalInfo.phone': { $regex: search, $options: 'i' } },
-                { 'vehicleInfo.plateNumber': { $regex: search, $options: 'i' } }
+                { 'driverInfo.name': { $regex: search, $options: 'i' } },
+                { 'driverInfo.phone': { $regex: search, $options: 'i' } },
+                { 'driverInfo.plateNumber': { $regex: search, $options: 'i' } },
+                { 'driverInfo.code': { $regex: search, $options: 'i' } },
+                { 'driverInfo.tinNo': { $regex: search, $options: 'i' } }
             ];
         }
 
@@ -260,7 +261,7 @@ router.put('/:id', auth, isOperationsOrAdmin, async (req, res) => {
         const previousValues = driver.toObject();
 
         // Update allowed fields
-        const allowedUpdates = ['personalInfo', 'vehicleInfo', 'internalNotes'];
+        const allowedUpdates = ['driverInfo', 'internalNotes'];
         allowedUpdates.forEach(field => {
             if (req.body[field]) {
                 driver[field] = { ...driver[field], ...req.body[field] };

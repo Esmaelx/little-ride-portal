@@ -220,11 +220,10 @@ function Approvals() {
                                             <td>
                                                 <div className="driver-info">
                                                     <span className="driver-name">
-                                                        {doc.driver?.personalInfo?.firstName}{' '}
-                                                        {doc.driver?.personalInfo?.lastName}
+                                                        {doc.driver?.driverInfo?.name}
                                                     </span>
                                                     <span className="text-muted text-sm">
-                                                        {doc.driver?.vehicleInfo?.plateNumber}
+                                                        {doc.driver?.driverInfo?.plateNumber}
                                                     </span>
                                                 </div>
                                             </td>

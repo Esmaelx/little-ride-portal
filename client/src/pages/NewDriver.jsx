@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { driversAPI, documentsAPI } from '../services/api';
 import {
     User,
-    Car,
     FileText,
     Upload,
     Check,
@@ -16,16 +15,22 @@ import {
 import './NewDriver.css';
 
 const STEPS = [
-    { id: 1, title: 'Personal Info', icon: User },
-    { id: 2, title: 'Vehicle Info', icon: Car },
-    { id: 3, title: 'Documents', icon: FileText }
+    { id: 1, title: 'Driver Info', icon: User },
+    { id: 2, title: 'Documents', icon: FileText }
 ];
 
 const DOCUMENT_TYPES = [
-    { id: 'license', label: 'Driving License', required: true },
-    { id: 'insurance', label: 'Vehicle Insurance', required: true },
-    { id: 'vehicle_registration', label: 'Vehicle Registration', required: true },
-    { id: 'photo', label: 'Driver Photo', required: true }
+    { id: 'dl', label: 'DL 🪪', fullLabel: 'Driving License', required: false },
+    { id: 'lib', label: 'Lib 📚', fullLabel: 'Libre (Vehicle Registration)', required: false },
+    { id: 'ins', label: 'Ins 🛡️', fullLabel: 'Insurance', required: false },
+    { id: 'bl', label: 'BL 🏢', fullLabel: 'Business License', required: false },
+    { id: 'tin', label: 'TIN 🧾', fullLabel: 'TIN Certificate', required: false },
+    { id: 'poa', label: 'POA 📜', fullLabel: 'Power of Attorney', required: false }
+];
+
+const STATUS_OPTIONS = [
+    { value: 'registration', label: 'Registration 🖊️' },
+    { value: 'reactivation', label: 'Reactivation ♻️' }
 ];
 
 function NewDriver() {
@@ -36,33 +41,24 @@ function NewDriver() {
     const [driverId, setDriverId] = useState(null);
 
     const [formData, setFormData] = useState({
-        personalInfo: {
-            firstName: '',
-            lastName: '',
+        driverInfo: {
+            name: '',
             phone: '',
             email: '',
-            dateOfBirth: '',
-            address: {
-                city: 'Addis Ababa',
-                subcity: '',
-                woreda: ''
-            }
-        },
-        vehicleInfo: {
+            code: '',
             plateNumber: '',
-            make: '',
-            model: '',
-            year: '',
-            color: '',
-            vehicleType: 'sedan'
+            registrationStatus: 'registration',
+            tinNo: ''
         }
     });
 
     const [documents, setDocuments] = useState({
-        license: null,
-        insurance: null,
-        vehicle_registration: null,
-        photo: null
+        dl: null,
+        lib: null,
+        ins: null,
+        bl: null,
+        tin: null,
+        poa: null
     });
 
     const [uploadStatus, setUploadStatus] = useState({});
@@ -121,23 +117,15 @@ function NewDriver() {
         setError('');
 
         if (step === 1) {
-            const { firstName, lastName, phone } = formData.personalInfo;
-            if (!firstName || !lastName || !phone) {
-                setError('Please fill in all required fields');
+            const { name, phone, plateNumber } = formData.driverInfo;
+            if (!name || !phone || !plateNumber) {
+                setError('Please fill in all required fields (Name, Phone, Plate Number)');
                 return false;
             }
-            // Validate Ethiopian phone
-            const phoneRegex = /^(\+251|0)?[79]\d{8}$/;
+            // Validate Ethiopian phone (with 251 prefix format)
+            const phoneRegex = /^(251)?[79]\d{8}$/;
             if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
-                setError('Please enter a valid Ethiopian phone number');
-                return false;
-            }
-        }
-
-        if (step === 2) {
-            const { plateNumber, make, model } = formData.vehicleInfo;
-            if (!plateNumber || !make || !model) {
-                setError('Please fill in all required fields');
+                setError('Please enter a valid phone number (e.g., 251912345678)');
                 return false;
             }
         }
@@ -148,13 +136,13 @@ function NewDriver() {
     const handleNext = async () => {
         if (!validateStep(currentStep)) return;
 
-        if (currentStep === 2 && !driverId) {
+        if (currentStep === 1 && !driverId) {
             // Create driver before moving to documents
             try {
                 setLoading(true);
                 const response = await driversAPI.create(formData);
                 setDriverId(response.data.data._id);
-                setCurrentStep(3);
+                setCurrentStep(2);
             } catch (err) {
                 setError(err.response?.data?.message || 'Error creating driver');
             } finally {
@@ -245,184 +233,96 @@ function NewDriver() {
                         </div>
                     )}
 
-                    {/* Step 1: Personal Info */}
+                    {/* Step 1: Driver Info */}
                     {currentStep === 1 && (
                         <div className="form-step">
-                            <h3 className="step-heading">Personal Information</h3>
+                            <h3 className="step-heading">Driver Information</h3>
 
                             <div className="form-grid">
                                 <div className="form-group">
-                                    <label className="form-label required">First Name</label>
+                                    <label className="form-label required">Name 🧑‍💼</label>
                                     <input
                                         type="text"
                                         className="form-input"
-                                        placeholder="Enter first name"
-                                        value={formData.personalInfo.firstName}
-                                        onChange={(e) => handleInputChange('personalInfo', 'firstName', e.target.value)}
+                                        placeholder="Enter full name"
+                                        value={formData.driverInfo.name}
+                                        onChange={(e) => handleInputChange('driverInfo', 'name', e.target.value)}
                                     />
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label required">Last Name</label>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="Enter last name"
-                                        value={formData.personalInfo.lastName}
-                                        onChange={(e) => handleInputChange('personalInfo', 'lastName', e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label className="form-label required">Phone Number</label>
+                                    <label className="form-label required">Mobile 📱</label>
                                     <input
                                         type="tel"
                                         className="form-input"
-                                        placeholder="+251 9XX XXX XXX"
-                                        value={formData.personalInfo.phone}
-                                        onChange={(e) => handleInputChange('personalInfo', 'phone', e.target.value)}
+                                        placeholder="251912345678"
+                                        value={formData.driverInfo.phone}
+                                        onChange={(e) => handleInputChange('driverInfo', 'phone', e.target.value)}
                                     />
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">Email</label>
+                                    <label className="form-label">Email 📧</label>
                                     <input
                                         type="email"
                                         className="form-input"
                                         placeholder="driver@email.com"
-                                        value={formData.personalInfo.email}
-                                        onChange={(e) => handleInputChange('personalInfo', 'email', e.target.value)}
+                                        value={formData.driverInfo.email}
+                                        onChange={(e) => handleInputChange('driverInfo', 'email', e.target.value)}
                                     />
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">Date of Birth</label>
-                                    <input
-                                        type="date"
-                                        className="form-input"
-                                        value={formData.personalInfo.dateOfBirth}
-                                        onChange={(e) => handleInputChange('personalInfo', 'dateOfBirth', e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label className="form-label">City</label>
+                                    <label className="form-label">Code 🔢</label>
                                     <input
                                         type="text"
                                         className="form-input"
-                                        value={formData.personalInfo.address.city}
-                                        onChange={(e) => handleInputChange('personalInfo', 'address.city', e.target.value)}
+                                        placeholder="e.g., 03"
+                                        value={formData.driverInfo.code}
+                                        onChange={(e) => handleInputChange('driverInfo', 'code', e.target.value)}
                                     />
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">Sub City</label>
+                                    <label className="form-label required">Plate 🚗</label>
                                     <input
                                         type="text"
                                         className="form-input"
-                                        placeholder="e.g., Bole, Kirkos"
-                                        value={formData.personalInfo.address.subcity}
-                                        onChange={(e) => handleInputChange('personalInfo', 'address.subcity', e.target.value)}
+                                        placeholder="e.g., B59576"
+                                        value={formData.driverInfo.plateNumber}
+                                        onChange={(e) => handleInputChange('driverInfo', 'plateNumber', e.target.value.toUpperCase())}
                                     />
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label">Woreda</label>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="Woreda number"
-                                        value={formData.personalInfo.address.woreda}
-                                        onChange={(e) => handleInputChange('personalInfo', 'address.woreda', e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Step 2: Vehicle Info */}
-                    {currentStep === 2 && (
-                        <div className="form-step">
-                            <h3 className="step-heading">Vehicle Information</h3>
-
-                            <div className="form-grid">
-                                <div className="form-group">
-                                    <label className="form-label required">Plate Number</label>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="e.g., 3-12345"
-                                        value={formData.vehicleInfo.plateNumber}
-                                        onChange={(e) => handleInputChange('vehicleInfo', 'plateNumber', e.target.value.toUpperCase())}
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label className="form-label required">Vehicle Type</label>
+                                    <label className="form-label required">Status 🖊️♻️</label>
                                     <select
                                         className="form-input"
-                                        value={formData.vehicleInfo.vehicleType}
-                                        onChange={(e) => handleInputChange('vehicleInfo', 'vehicleType', e.target.value)}
+                                        value={formData.driverInfo.registrationStatus}
+                                        onChange={(e) => handleInputChange('driverInfo', 'registrationStatus', e.target.value)}
                                     >
-                                        <option value="sedan">Sedan</option>
-                                        <option value="suv">SUV</option>
-                                        <option value="minibus">Minibus</option>
-                                        <option value="bajaj">Bajaj</option>
-                                        <option value="motorcycle">Motorcycle</option>
+                                        {STATUS_OPTIONS.map(option => (
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        ))}
                                     </select>
                                 </div>
 
                                 <div className="form-group">
-                                    <label className="form-label required">Make</label>
+                                    <label className="form-label">TIN No 🆔</label>
                                     <input
                                         type="text"
                                         className="form-input"
-                                        placeholder="e.g., Toyota, Hyundai"
-                                        value={formData.vehicleInfo.make}
-                                        onChange={(e) => handleInputChange('vehicleInfo', 'make', e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label className="form-label required">Model</label>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="e.g., Corolla, Accent"
-                                        value={formData.vehicleInfo.model}
-                                        onChange={(e) => handleInputChange('vehicleInfo', 'model', e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label className="form-label">Year</label>
-                                    <input
-                                        type="number"
-                                        className="form-input"
-                                        placeholder="e.g., 2020"
-                                        min="1990"
-                                        max={new Date().getFullYear() + 1}
-                                        value={formData.vehicleInfo.year}
-                                        onChange={(e) => handleInputChange('vehicleInfo', 'year', e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label className="form-label">Color</label>
-                                    <input
-                                        type="text"
-                                        className="form-input"
-                                        placeholder="e.g., White, Silver"
-                                        value={formData.vehicleInfo.color}
-                                        onChange={(e) => handleInputChange('vehicleInfo', 'color', e.target.value)}
+                                        placeholder="e.g., 0085155141"
+                                        value={formData.driverInfo.tinNo}
+                                        onChange={(e) => handleInputChange('driverInfo', 'tinNo', e.target.value)}
                                     />
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* Step 3: Documents */}
-                    {currentStep === 3 && (
+                    {/* Step 2: Documents */}
+                    {currentStep === 2 && (
                         <div className="form-step">
                             <h3 className="step-heading">Upload Documents</h3>
                             <p className="step-description">
@@ -493,7 +393,7 @@ function NewDriver() {
 
                         <div className="flex-spacer"></div>
 
-                        {currentStep < 3 ? (
+                        {currentStep < 2 ? (
                             <button
                                 type="button"
                                 className="btn btn-primary"
