@@ -111,7 +111,7 @@ function Dashboard() {
                         <option value="week">This Week</option>
                         <option value="month">This Month</option>
                     </select>
-                    {(user.role === 'sales_agent' || user.role === 'admin') && (
+                    {user.role === 'sales_agent' && (
                         <Link to="/drivers/new" className="btn btn-primary">
                             <Plus size={18} />
                             Register Driver
@@ -324,10 +324,12 @@ function Dashboard() {
                             <p className="empty-state-text">
                                 Start by registering your first driver
                             </p>
-                            <Link to="/drivers/new" className="btn btn-primary">
-                                <Plus size={18} />
-                                Register Driver
-                            </Link>
+                            {user.role === 'sales_agent' && (
+                                <Link to="/drivers/new" className="btn btn-primary">
+                                    <Plus size={18} />
+                                    Register Driver
+                                </Link>
+                            )}
                         </div>
                     </div>
                 )}

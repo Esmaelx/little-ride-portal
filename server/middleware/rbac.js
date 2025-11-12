@@ -57,8 +57,8 @@ const isAdmin = requireRole('admin');
 // Check if user is operations or admin
 const isOperationsOrAdmin = requireRole('operations', 'admin');
 
-// Check if user is sales agent (or higher)
-const isSalesAgent = requireRole('sales_agent', 'operations', 'admin');
+// Check if user is sales agent only (for driver registration)
+const isSalesAgent = requireRole('sales_agent');
 
 module.exports = {
     requireRole,

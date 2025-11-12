@@ -95,7 +95,7 @@ function Drivers() {
                         {pagination.total} driver{pagination.total !== 1 ? 's' : ''} registered
                     </p>
                 </div>
-                {(user.role === 'sales_agent' || user.role === 'admin') && (
+                {user.role === 'sales_agent' && (
                     <Link to="/drivers/new" className="btn btn-primary">
                         <Plus size={18} />
                         Register Driver
@@ -250,7 +250,7 @@ function Drivers() {
                                     ? 'Try adjusting your filters'
                                     : 'Register your first driver to get started'}
                             </p>
-                            {(user.role === 'sales_agent' || user.role === 'admin') && !filters.search && (
+                            {user.role === 'sales_agent' && !filters.search && (
                                 <Link to="/drivers/new" className="btn btn-primary">
                                     <Plus size={18} />
                                     Register Driver

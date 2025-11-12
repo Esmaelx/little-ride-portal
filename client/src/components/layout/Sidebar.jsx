@@ -33,7 +33,7 @@ function Sidebar() {
             label: 'Register Driver',
             path: '/drivers/new',
             icon: UserPlus,
-            roles: ['sales_agent', 'admin']
+            roles: ['sales_agent']
         },
         {
             label: 'Approval Queue',
