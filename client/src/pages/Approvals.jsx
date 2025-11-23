@@ -1,48 +1,48 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { documentsAPI } from '../services/api';
+import { driversAPI } from '../services/api';
 import {
     FileCheck,
     FileX,
     Eye,
     Check,
     X,
-    Filter,
     AlertCircle,
     ChevronLeft,
     ChevronRight,
     Loader,
-    ExternalLink
+    Clock,
+    Car
 } from 'lucide-react';
 import './Approvals.css';
 
 const REJECTION_REASONS = [
-    'Document is blurry or unreadable',
-    'Document is expired',
+    'Missing documents',
+    'Invalid documents',
     'Information does not match',
-    'Document is incomplete',
-    'Wrong document type',
+    'Expired documents',
+    'Failed verification',
     'Other'
 ];
 
 function Approvals() {
-    const [documents, setDocuments] = useState([]);
-    const [counts, setCounts] = useState({ pending: 0, approved: 0, rejected: 0 });
+    const [drivers, setDrivers] = useState([]);
+    const [counts, setCounts] = useState({ pending: 0, under_review: 0, approved: 0, rejected: 0 });
     const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
     const [loading, setLoading] = useState(true);
-    const [filters, setFilters] = useState({ status: 'pending', type: '' });
+    const [filters, setFilters] = useState({ status: 'pending' });
 
-    const [selectedDoc, setSelectedDoc] = useState(null);
+    const [selectedDriver, setSelectedDriver] = useState(null);
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
     const [customReason, setCustomReason] = useState('');
     const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
-        fetchDocuments();
+        fetchDrivers();
     }, [filters]);
 
-    const fetchDocuments = async () => {
+    const fetchDrivers = async () => {
         try {
             setLoading(true);
             const params = {
@@ -50,92 +50,76 @@ function Approvals() {
                 limit: 20,
                 status: filters.status === 'all' ? undefined : filters.status
             };
-            if (filters.type) params.type = filters.type;
 
-            const response = await documentsAPI.getQueue(params);
-            setDocuments(response.data.data);
+            const response = await driversAPI.getQueue(params);
+            setDrivers(response.data.data);
             setCounts(response.data.counts);
             setPagination(response.data.pagination);
         } catch (error) {
-            console.error('Error fetching documents:', error);
+            console.error('Error fetching drivers:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleApprove = async (docId) => {
+    const handleApprove = async (driverId) => {
         setProcessing(true);
         try {
-            await documentsAPI.updateStatus(docId, { status: 'approved' });
-            fetchDocuments();
+            await driversAPI.updateStatus(driverId, { status: 'approved' });
+            fetchDrivers();
         } catch (error) {
-            console.error('Error approving document:', error);
+            console.error('Error approving driver:', error);
         } finally {
             setProcessing(false);
         }
     };
 
     const handleReject = async () => {
-        if (!selectedDoc) return;
+        if (!selectedDriver) return;
 
         const reason = rejectionReason === 'Other' ? customReason : rejectionReason;
         if (!reason) return;
 
         setProcessing(true);
         try {
-            await documentsAPI.updateStatus(selectedDoc._id, {
+            await driversAPI.updateStatus(selectedDriver._id, {
                 status: 'rejected',
                 rejectionReason: reason
             });
             setShowRejectModal(false);
-            setSelectedDoc(null);
+            setSelectedDriver(null);
             setRejectionReason('');
             setCustomReason('');
-            fetchDocuments();
+            fetchDrivers();
         } catch (error) {
-            console.error('Error rejecting document:', error);
+            console.error('Error rejecting driver:', error);
         } finally {
             setProcessing(false);
         }
     };
 
-    const openRejectModal = (doc) => {
-        setSelectedDoc(doc);
+    const openRejectModal = (driver) => {
+        setSelectedDriver(driver);
         setShowRejectModal(true);
-    };
-
-    const viewDocument = async (docId) => {
-        try {
-            const response = await documentsAPI.getFile(docId);
-            const url = URL.createObjectURL(response.data);
-            window.open(url, '_blank');
-        } catch (error) {
-            console.error('Error viewing document:', error);
-        }
-    };
-
-    const getDocTypeLabel = (type) => {
-        const labels = {
-            license: 'Driving License',
-            insurance: 'Insurance',
-            vehicle_registration: 'Vehicle Reg.',
-            photo: 'Driver Photo',
-            national_id: 'National ID',
-            business_license: 'Business License'
-        };
-        return labels[type] || type;
     };
 
     const getStatusBadge = (status) => {
         const icons = {
-            pending: <AlertCircle size={12} />,
+            pending: <Clock size={12} />,
+            under_review: <AlertCircle size={12} />,
             approved: <Check size={12} />,
             rejected: <X size={12} />
+        };
+        const labels = {
+            pending: 'Pending',
+            under_review: 'Under Review',
+            approved: 'Approved',
+            rejected: 'Rejected'
         };
         return (
             <span className={`badge badge-${status}`}>
                 {icons[status]}
-                {status}
+                {labels[status] || status}
             </span>
         );
     };
@@ -144,8 +128,8 @@ function Approvals() {
         <div className="approvals-page">
             <div className="page-header">
                 <div>
-                    <h1 className="page-title">Document Approval Queue</h1>
-                    <p className="page-subtitle">Review and approve driver documents</p>
+                    <h1 className="page-title">Driver Approval Queue</h1>
+                    <p className="page-subtitle">Review and approve driver registrations</p>
                 </div>
             </div>
 
@@ -155,9 +139,17 @@ function Approvals() {
                     className={`tab ${filters.status === 'pending' ? 'active' : ''}`}
                     onClick={() => setFilters(prev => ({ ...prev, status: 'pending' }))}
                 >
-                    <AlertCircle size={16} />
+                    <Clock size={16} />
                     Pending
                     <span className="tab-count">{counts.pending}</span>
+                </button>
+                <button
+                    className={`tab ${filters.status === 'under_review' ? 'active' : ''}`}
+                    onClick={() => setFilters(prev => ({ ...prev, status: 'under_review' }))}
+                >
+                    <AlertCircle size={16} />
+                    Under Review
+                    <span className="tab-count">{counts.under_review}</span>
                 </button>
                 <button
                     className={`tab ${filters.status === 'approved' ? 'active' : ''}`}
@@ -177,78 +169,83 @@ function Approvals() {
                 </button>
             </div>
 
-            {/* Filter */}
-            <div className="filters-bar">
-                <div className="filter-group">
-                    <Filter size={18} className="text-muted" />
-                    <select
-                        className="form-input filter-select"
-                        value={filters.type}
-                        onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
-                    >
-                        <option value="">All Document Types</option>
-                        <option value="license">Driving License</option>
-                        <option value="insurance">Insurance</option>
-                        <option value="vehicle_registration">Vehicle Registration</option>
-                        <option value="photo">Driver Photo</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* Documents Table */}
+            {/* Drivers Table */}
             <div className="card">
                 {loading ? (
                     <div className="loading-container">
                         <div className="spinner"></div>
                     </div>
-                ) : documents.length > 0 ? (
+                ) : drivers.length > 0 ? (
                     <>
                         <div className="table-container">
                             <table className="table">
                                 <thead>
                                     <tr>
                                         <th>Driver</th>
-                                        <th>Document Type</th>
-                                        <th>Uploaded</th>
+                                        <th>Mobile</th>
+                                        <th>Plate</th>
+                                        <th>Type</th>
+                                        <th>Registered By</th>
+                                        <th>Date</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {documents.map(doc => (
-                                        <tr key={doc._id}>
+                                    {drivers.map(driver => (
+                                        <tr key={driver._id}>
                                             <td>
                                                 <div className="driver-info">
-                                                    <span className="driver-name">
-                                                        {doc.driver?.driverInfo?.name}
-                                                    </span>
-                                                    <span className="text-muted text-sm">
-                                                        {doc.driver?.driverInfo?.plateNumber}
-                                                    </span>
+                                                    <div className="driver-avatar">
+                                                        <Car size={16} />
+                                                    </div>
+                                                    <div>
+                                                        <span className="driver-name">
+                                                            {driver.driverInfo?.name}
+                                                        </span>
+                                                        {driver.driverInfo?.code && (
+                                                            <span className="text-muted text-sm">
+                                                                Code: {driver.driverInfo.code}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </td>
+                                            <td>{driver.driverInfo?.phone}</td>
                                             <td>
-                                                <span className="doc-type">{getDocTypeLabel(doc.type)}</span>
+                                                <code className="plate-number">
+                                                    {driver.driverInfo?.plateNumber}
+                                                </code>
+                                            </td>
+                                            <td>
+                                                <span className={`badge badge-${driver.driverInfo?.registrationStatus || 'registration'}`}>
+                                                    {driver.driverInfo?.registrationStatus === 'reactivation'
+                                                        ? 'Reactivation'
+                                                        : 'Registration'}
+                                                </span>
+                                            </td>
+                                            <td className="text-sm">
+                                                {driver.registeredBy?.name || 'Unknown'}
                                             </td>
                                             <td className="text-muted text-sm">
-                                                {new Date(doc.createdAt).toLocaleDateString()}
+                                                {new Date(driver.createdAt).toLocaleDateString()}
                                             </td>
-                                            <td>{getStatusBadge(doc.status)}</td>
+                                            <td>{getStatusBadge(driver.status)}</td>
                                             <td>
                                                 <div className="action-buttons">
-                                                    <button
+                                                    <Link
+                                                        to={`/drivers/${driver._id}`}
                                                         className="btn btn-ghost btn-sm btn-icon"
-                                                        title="View Document"
-                                                        onClick={() => viewDocument(doc._id)}
+                                                        title="View Details"
                                                     >
                                                         <Eye size={16} />
-                                                    </button>
+                                                    </Link>
 
-                                                    {doc.status === 'pending' && (
+                                                    {(driver.status === 'pending' || driver.status === 'under_review') && (
                                                         <>
                                                             <button
                                                                 className="btn btn-success btn-sm"
-                                                                onClick={() => handleApprove(doc._id)}
+                                                                onClick={() => handleApprove(driver._id)}
                                                                 disabled={processing}
                                                             >
                                                                 <Check size={14} />
@@ -256,7 +253,7 @@ function Approvals() {
                                                             </button>
                                                             <button
                                                                 className="btn btn-danger btn-sm"
-                                                                onClick={() => openRejectModal(doc)}
+                                                                onClick={() => openRejectModal(driver)}
                                                                 disabled={processing}
                                                             >
                                                                 <X size={14} />
@@ -265,9 +262,9 @@ function Approvals() {
                                                         </>
                                                     )}
 
-                                                    {doc.status === 'rejected' && doc.rejectionReason && (
-                                                        <span className="rejection-reason" title={doc.rejectionReason}>
-                                                            {doc.rejectionReason}
+                                                    {driver.status === 'rejected' && driver.rejectionReason && (
+                                                        <span className="rejection-reason" title={driver.rejectionReason}>
+                                                            {driver.rejectionReason}
                                                         </span>
                                                     )}
                                                 </div>
@@ -304,11 +301,11 @@ function Approvals() {
                     <div className="card-body">
                         <div className="empty-state">
                             <FileCheck size={48} className="empty-state-icon" />
-                            <h4 className="empty-state-title">No documents found</h4>
+                            <h4 className="empty-state-title">No drivers found</h4>
                             <p className="empty-state-text">
                                 {filters.status === 'pending'
-                                    ? 'All documents have been reviewed!'
-                                    : 'No documents match the current filters'}
+                                    ? 'All drivers have been reviewed!'
+                                    : 'No drivers match the current filter'}
                             </p>
                         </div>
                     </div>
@@ -320,7 +317,7 @@ function Approvals() {
                 <div className="modal-overlay" onClick={() => setShowRejectModal(false)}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h3>Reject Document</h3>
+                            <h3>Reject Driver</h3>
                             <button
                                 className="btn btn-ghost btn-icon btn-sm"
                                 onClick={() => setShowRejectModal(false)}
@@ -330,7 +327,7 @@ function Approvals() {
                         </div>
                         <div className="modal-body">
                             <p className="text-muted mb-4">
-                                Please select a reason for rejecting this document.
+                                Please select a reason for rejecting this driver: <strong>{selectedDriver?.driverInfo?.name}</strong>
                             </p>
 
                             <div className="form-group">
@@ -373,7 +370,7 @@ function Approvals() {
                                 disabled={!rejectionReason || (rejectionReason === 'Other' && !customReason) || processing}
                             >
                                 {processing ? <Loader size={16} className="spin" /> : <X size={16} />}
-                                Reject Document
+                                Reject Driver
                             </button>
                         </div>
                     </div>

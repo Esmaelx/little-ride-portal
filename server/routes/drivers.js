@@ -118,6 +118,65 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
+// @route   GET /api/drivers/queue
+// @desc    Get driver approval queue for operations
+// @access  Operations, Admin
+router.get('/queue', auth, isOperationsOrAdmin, async (req, res) => {
+    try {
+        const { status = 'pending', page = 1, limit = 20 } = req.query;
+
+        let query = {};
+
+        if (status !== 'all') {
+            query.status = status;
+        }
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        const [drivers, total] = await Promise.all([
+            Driver.find(query)
+                .populate('registeredBy', 'name email')
+                .populate('reviewedBy', 'name email')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(parseInt(limit)),
+            Driver.countDocuments(query)
+        ]);
+
+        // Get counts by status
+        const statusCounts = await Driver.aggregate([
+            {
+                $group: {
+                    _id: '$status',
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        const counts = { pending: 0, under_review: 0, approved: 0, rejected: 0 };
+        statusCounts.forEach(s => { counts[s._id] = s.count; });
+
+        res.json({
+            success: true,
+            data: drivers,
+            counts,
+            pagination: {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                total,
+                pages: Math.ceil(total / parseInt(limit))
+            }
+        });
+
+    } catch (error) {
+        console.error('Get queue error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching queue'
+        });
+    }
+});
+
 // @route   GET /api/drivers/stats
 // @desc    Get driver statistics
 // @access  Private

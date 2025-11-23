@@ -150,7 +150,8 @@ function Drivers() {
                                         <th>Mobile 📱</th>
                                         <th>Code 🔢</th>
                                         <th>Plate 🚗</th>
-                                        <th>Status 🖊️♻️</th>
+                                        <th>Type</th>
+                                        <th>Status ✅</th>
                                         <th>Registered By 🖊️</th>
                                         <th>Date</th>
                                         <th></th>
@@ -194,6 +195,7 @@ function Drivers() {
                                                         : 'Registration 🖊️'}
                                                 </span>
                                             </td>
+                                            <td>{getStatusBadge(driver.status)}</td>
                                             <td className="text-sm">
                                                 {driver.registeredBy?.name || 'Unknown'}
                                             </td>

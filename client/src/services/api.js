@@ -75,6 +75,7 @@ export const authAPI = {
 // Drivers API
 export const driversAPI = {
     getAll: (params) => api.get('/drivers', { params }),
+    getQueue: (params) => api.get('/drivers/queue', { params }),
     getStats: (params) => api.get('/drivers/stats', { params }),
     getById: (id) => api.get(`/drivers/${id}`),
     create: (data) => api.post('/drivers', data),
