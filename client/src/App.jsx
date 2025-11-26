@@ -6,6 +6,7 @@ import { ProtectedRoute, AppLayout } from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Drivers from './pages/Drivers';
+import DriverDetails from './pages/DriverDetails';
 import NewDriver from './pages/NewDriver';
 import Approvals from './pages/Approvals';
 import Users from './pages/Users';
@@ -58,9 +59,20 @@ function App() {
             <Route
                 path="/drivers/new"
                 element={
-                    <ProtectedRoute allowedRoles={['sales_agent', 'admin']}>
+                    <ProtectedRoute allowedRoles={['sales_agent']}>
                         <AppLayout>
                             <NewDriver />
+                        </AppLayout>
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/drivers/:id"
+                element={
+                    <ProtectedRoute>
+                        <AppLayout>
+                            <DriverDetails />
                         </AppLayout>
                     </ProtectedRoute>
                 }

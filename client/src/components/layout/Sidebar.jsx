@@ -24,7 +24,7 @@ function Sidebar() {
             roles: ['sales_agent', 'operations', 'admin']
         },
         {
-            label: 'My Drivers',
+            label: user?.role === 'sales_agent' ? 'My Registrations' : 'Driver Management',
             path: '/drivers',
             icon: Car,
             roles: ['sales_agent', 'operations', 'admin']
@@ -34,12 +34,6 @@ function Sidebar() {
             path: '/drivers/new',
             icon: UserPlus,
             roles: ['sales_agent']
-        },
-        {
-            label: 'Approval Queue',
-            path: '/approvals',
-            icon: FileCheck,
-            roles: ['operations', 'admin']
         },
         {
             label: 'User Management',

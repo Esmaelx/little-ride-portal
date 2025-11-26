@@ -9,9 +9,21 @@ import {
     Car,
     Eye,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Check,
+    X,
+    Loader
 } from 'lucide-react';
 import './Drivers.css';
+
+const REJECTION_REASONS = [
+    'Missing documents',
+    'Invalid documents',
+    'Information does not match',
+    'Expired documents',
+    'Failed verification',
+    'Other'
+];
 
 function Drivers() {
     const { user } = useAuth();
@@ -19,12 +31,22 @@ function Drivers() {
     const [drivers, setDrivers] = useState([]);
     const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
     const [loading, setLoading] = useState(true);
+    const [processing, setProcessing] = useState(false);
 
     const [filters, setFilters] = useState({
         status: searchParams.get('status') || 'all',
         search: searchParams.get('search') || '',
         page: parseInt(searchParams.get('page')) || 1
     });
+
+    // Rejection modal state
+    const [showRejectModal, setShowRejectModal] = useState(false);
+    const [selectedDriver, setSelectedDriver] = useState(null);
+    const [rejectionReason, setRejectionReason] = useState('');
+    const [customReason, setCustomReason] = useState('');
+
+    const isOperationsOrAdmin = user.role === 'operations' || user.role === 'admin';
+    const isSalesAgent = user.role === 'sales_agent';
 
     useEffect(() => {
         fetchDrivers();
@@ -70,6 +92,58 @@ function Drivers() {
         setFilters(prev => ({ ...prev, page: 1 }));
     };
 
+    const handleApprove = async (driverId) => {
+        setProcessing(true);
+        try {
+            await driversAPI.updateStatus(driverId, { status: 'approved' });
+            fetchDrivers();
+        } catch (error) {
+            console.error('Error approving driver:', error);
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const handleReject = async () => {
+        if (!selectedDriver) return;
+        const reason = rejectionReason === 'Other' ? customReason : rejectionReason;
+        if (!reason) return;
+
+        setProcessing(true);
+        try {
+            await driversAPI.updateStatus(selectedDriver._id, {
+                status: 'rejected',
+                rejectionReason: reason
+            });
+            setShowRejectModal(false);
+            setSelectedDriver(null);
+            setRejectionReason('');
+            setCustomReason('');
+            fetchDrivers();
+        } catch (error) {
+            console.error('Error rejecting driver:', error);
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const handleStatusChange = async (driverId, newStatus) => {
+        setProcessing(true);
+        try {
+            await driversAPI.updateStatus(driverId, { status: newStatus });
+            fetchDrivers();
+        } catch (error) {
+            console.error('Error changing status:', error);
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const openRejectModal = (driver) => {
+        setSelectedDriver(driver);
+        setShowRejectModal(true);
+    };
+
     const getStatusBadge = (status) => {
         const labels = {
             pending: 'Pending',
@@ -89,13 +163,13 @@ function Drivers() {
             <div className="page-header">
                 <div>
                     <h1 className="page-title">
-                        {user.role === 'sales_agent' ? 'My Drivers' : 'All Drivers'}
+                        {isSalesAgent ? 'My Registrations' : 'Driver Management'}
                     </h1>
                     <p className="page-subtitle">
                         {pagination.total} driver{pagination.total !== 1 ? 's' : ''} registered
                     </p>
                 </div>
-                {user.role === 'sales_agent' && (
+                {isSalesAgent && (
                     <Link to="/drivers/new" className="btn btn-primary">
                         <Plus size={18} />
                         Register Driver
@@ -152,9 +226,13 @@ function Drivers() {
                                         <th>Plate 🚗</th>
                                         <th>Type</th>
                                         <th>Status ✅</th>
-                                        <th>Registered By 🖊️</th>
+                                        {isSalesAgent ? (
+                                            <th>Approved By ✅</th>
+                                        ) : (
+                                            <th>Registered By 🖊️</th>
+                                        )}
                                         <th>Date</th>
-                                        <th></th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -197,19 +275,69 @@ function Drivers() {
                                             </td>
                                             <td>{getStatusBadge(driver.status)}</td>
                                             <td className="text-sm">
-                                                {driver.registeredBy?.name || 'Unknown'}
+                                                {isSalesAgent
+                                                    ? (driver.reviewedBy?.name || '-')
+                                                    : (driver.registeredBy?.name || 'Unknown')
+                                                }
                                             </td>
                                             <td className="text-muted text-sm">
                                                 {new Date(driver.createdAt).toLocaleDateString()}
                                             </td>
                                             <td>
-                                                <Link
-                                                    to={`/drivers/${driver._id}`}
-                                                    className="btn btn-ghost btn-sm btn-icon"
-                                                    title="View Details"
-                                                >
-                                                    <Eye size={16} />
-                                                </Link>
+                                                <div className="action-buttons">
+                                                    <Link
+                                                        to={`/drivers/${driver._id}`}
+                                                        className="btn btn-ghost btn-sm btn-icon"
+                                                        title="View Details"
+                                                    >
+                                                        <Eye size={16} />
+                                                    </Link>
+
+                                                    {isOperationsOrAdmin && (
+                                                        <>
+                                                            {driver.status !== 'approved' && (
+                                                                <button
+                                                                    className="btn btn-success btn-sm"
+                                                                    onClick={() => handleApprove(driver._id)}
+                                                                    disabled={processing}
+                                                                    title="Approve"
+                                                                >
+                                                                    <Check size={14} />
+                                                                </button>
+                                                            )}
+                                                            {driver.status !== 'rejected' && (
+                                                                <button
+                                                                    className="btn btn-danger btn-sm"
+                                                                    onClick={() => openRejectModal(driver)}
+                                                                    disabled={processing}
+                                                                    title="Reject"
+                                                                >
+                                                                    <X size={14} />
+                                                                </button>
+                                                            )}
+                                                            {driver.status === 'approved' && (
+                                                                <button
+                                                                    className="btn btn-warning btn-sm"
+                                                                    onClick={() => handleStatusChange(driver._id, 'pending')}
+                                                                    disabled={processing}
+                                                                    title="Revert to Pending"
+                                                                >
+                                                                    Revert
+                                                                </button>
+                                                            )}
+                                                            {driver.status === 'rejected' && (
+                                                                <button
+                                                                    className="btn btn-secondary btn-sm"
+                                                                    onClick={() => handleStatusChange(driver._id, 'pending')}
+                                                                    disabled={processing}
+                                                                    title="Revert to Pending"
+                                                                >
+                                                                    Revert
+                                                                </button>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -252,7 +380,7 @@ function Drivers() {
                                     ? 'Try adjusting your filters'
                                     : 'Register your first driver to get started'}
                             </p>
-                            {user.role === 'sales_agent' && !filters.search && (
+                            {isSalesAgent && !filters.search && (
                                 <Link to="/drivers/new" className="btn btn-primary">
                                     <Plus size={18} />
                                     Register Driver
@@ -262,6 +390,71 @@ function Drivers() {
                     </div>
                 )}
             </div>
+
+            {/* Rejection Modal */}
+            {showRejectModal && (
+                <div className="modal-overlay" onClick={() => setShowRejectModal(false)}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Reject Driver</h3>
+                            <button
+                                className="btn btn-ghost btn-icon btn-sm"
+                                onClick={() => setShowRejectModal(false)}
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <p className="text-muted mb-4">
+                                Rejecting: <strong>{selectedDriver?.driverInfo?.name}</strong>
+                            </p>
+
+                            <div className="form-group">
+                                <label className="form-label">Rejection Reason</label>
+                                <select
+                                    className="form-input"
+                                    value={rejectionReason}
+                                    onChange={(e) => setRejectionReason(e.target.value)}
+                                >
+                                    <option value="">Select a reason...</option>
+                                    {REJECTION_REASONS.map(reason => (
+                                        <option key={reason} value={reason}>{reason}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {rejectionReason === 'Other' && (
+                                <div className="form-group">
+                                    <label className="form-label">Custom Reason</label>
+                                    <textarea
+                                        className="form-input"
+                                        rows={3}
+                                        placeholder="Enter rejection reason..."
+                                        value={customReason}
+                                        onChange={(e) => setCustomReason(e.target.value)}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        <div className="modal-footer">
+                            <button
+                                className="btn btn-secondary"
+                                onClick={() => setShowRejectModal(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="btn btn-danger"
+                                onClick={handleReject}
+                                disabled={!rejectionReason || (rejectionReason === 'Other' && !customReason) || processing}
+                            >
+                                {processing ? <Loader size={16} className="spin" /> : <X size={16} />}
+                                Reject Driver
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
