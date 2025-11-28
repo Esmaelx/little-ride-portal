@@ -7,8 +7,7 @@ import {
     FileCheck,
     UserPlus,
     ClipboardList,
-    Settings,
-    Shield
+    Settings
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -66,7 +65,7 @@ function Sidebar() {
         <aside className="sidebar">
             <div className="sidebar-header">
                 <div className="sidebar-logo">
-                    <Shield size={32} />
+                    <img src="/little-logo.jpg" alt="Little-Ride Logo" className="sidebar-logo-img" />
                     <div className="logo-text">
                         <span className="logo-title">Little-Ride</span>
                         <span className="logo-subtitle">Internal Portal</span>

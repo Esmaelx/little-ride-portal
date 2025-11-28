@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Shield, Eye, EyeOff, Loader } from 'lucide-react';
+import { Eye, EyeOff, Loader } from 'lucide-react';
 import './Login.css';
 
 function Login() {
@@ -45,7 +45,7 @@ function Login() {
                 <div className="login-card">
                     <div className="login-header">
                         <div className="login-logo">
-                            <Shield size={40} />
+                            <img src="/little-logo.jpg" alt="Little-Ride Logo" style={{ width: 48, height: 48, borderRadius: '8px', objectFit: 'cover' }} />
                         </div>
                         <h1 className="login-title">Little-Ride Portal</h1>
                         <p className="login-subtitle">Internal Operations System</p>

@@ -54,11 +54,43 @@ function DriverDetails() {
     const [rejectionReason, setRejectionReason] = useState('');
     const [customReason, setCustomReason] = useState('');
 
+    // Document image previews
+    const [documentImageUrls, setDocumentImageUrls] = useState({});
+
     const isOperationsOrAdmin = user?.role === 'operations' || user?.role === 'admin';
 
     useEffect(() => {
         fetchDriverDetails();
     }, [id]);
+
+    // Fetch image previews for documents
+    useEffect(() => {
+        const fetchDocumentImages = async () => {
+            const imageUrls = {};
+            for (const doc of documents) {
+                // Check if it's an image type
+                if (doc.mimeType && doc.mimeType.startsWith('image/')) {
+                    try {
+                        const response = await documentsAPI.getFile(doc._id);
+                        const url = URL.createObjectURL(response.data);
+                        imageUrls[doc._id] = url;
+                    } catch (err) {
+                        console.error('Error fetching document image:', doc._id, err);
+                    }
+                }
+            }
+            setDocumentImageUrls(imageUrls);
+        };
+
+        if (documents.length > 0) {
+            fetchDocumentImages();
+        }
+
+        // Cleanup blob URLs on unmount
+        return () => {
+            Object.values(documentImageUrls).forEach(url => URL.revokeObjectURL(url));
+        };
+    }, [documents]);
 
     const fetchDriverDetails = async () => {
         try {
@@ -369,8 +401,23 @@ function DriverDetails() {
                         <div className="documents-grid">
                             {documents.map(doc => (
                                 <div key={doc._id} className="document-card">
-                                    <div className="document-icon">
-                                        <FileText size={32} />
+                                    <div className="document-preview">
+                                        {documentImageUrls[doc._id] ? (
+                                            <img
+                                                src={documentImageUrls[doc._id]}
+                                                alt={doc.originalName}
+                                                className="document-thumbnail"
+                                                onClick={() => viewDocument(doc._id)}
+                                            />
+                                        ) : doc.mimeType && doc.mimeType.startsWith('image/') ? (
+                                            <div className="document-icon loading">
+                                                <Loader size={24} className="spin" />
+                                            </div>
+                                        ) : (
+                                            <div className="document-icon">
+                                                <FileText size={32} />
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="document-info">
                                         <span className="document-type">

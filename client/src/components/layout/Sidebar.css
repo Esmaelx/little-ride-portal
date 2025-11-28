@@ -23,8 +23,11 @@
     color: white;
 }
 
-.sidebar-logo svg {
-    color: var(--primary-light);
+.sidebar-logo-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
 }
 
 .logo-text {
