@@ -1,0 +1,117 @@
+.drivers-page {
+    max-width: 1200px;
+}
+
+.filters-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.search-form {
+    flex: 1;
+    min-width: 280px;
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+.search-input {
+    padding-left: 44px;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-select {
+    width: auto;
+    min-width: 150px;
+}
+
+/* Driver Cell */
+.driver-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.driver-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius);
+    background: var(--primary-100);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.driver-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.driver-email {
+    font-size: 0.8125rem;
+}
+
+.vehicle-info {
+    color: var(--text-secondary);
+}
+
+.plate-number {
+    background: var(--bg-light);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+    color: var(--text-primary);
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+}
+
+.pagination-info {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+    .filters-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-form {
+        min-width: 100%;
+    }
+
+    .filter-group {
+        justify-content: flex-start;
+    }
+
+    .filter-select {
+        flex: 1;
+    }
+}

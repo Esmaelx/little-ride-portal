@@ -1,0 +1,223 @@
+.new-driver-page {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Progress Steps */
+.steps-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 32px;
+    padding: 0 20px;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.step-indicator {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg-light);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: all var(--transition);
+}
+
+.step.active .step-indicator {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.step.completed .step-indicator {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+}
+
+.step-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.step.active .step-title {
+    color: var(--text-primary);
+}
+
+.step-connector {
+    width: 60px;
+    height: 2px;
+    background: var(--border);
+    margin: 0 16px;
+}
+
+.step.completed+.step .step-connector,
+.step.active .step-connector {
+    background: var(--primary);
+}
+
+/* Form Card */
+.form-card {
+    margin-bottom: 32px;
+}
+
+.form-error-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--danger-bg);
+    color: var(--danger);
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+}
+
+.step-heading {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.step-description {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+/* Documents */
+.documents-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.document-upload-card {
+    background: var(--bg-light);
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1px solid var(--border);
+}
+
+.document-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.document-label {
+    font-weight: 500;
+    font-size: 0.9375rem;
+}
+
+.required-dot {
+    color: var(--danger);
+    margin-left: 2px;
+}
+
+.upload-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all var(--transition);
+    color: var(--text-muted);
+}
+
+.upload-area:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.upload-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.file-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.file-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.file-name {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-size {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+}
+
+.flex-spacer {
+    flex: 1;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@media (max-width: 640px) {
+    .steps-container {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .step-connector {
+        display: none;
+    }
+
+    .step-title {
+        display: none;
+    }
+
+    .form-grid,
+    .documents-grid {
+        grid-template-columns: 1fr;
+    }
+}

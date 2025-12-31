@@ -1,0 +1,122 @@
+.audit-page {
+    max-width: 1200px;
+}
+
+.filter-date {
+    width: auto;
+}
+
+/* Logs List */
+.logs-list {
+    padding: 8px 0;
+}
+
+.log-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-light);
+    transition: background var(--transition);
+}
+
+.log-item:hover {
+    background: var(--surface-hover);
+}
+
+.log-item:last-child {
+    border-bottom: none;
+}
+
+.log-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius);
+    background: var(--bg-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.log-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.log-description {
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.log-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8125rem;
+}
+
+.log-action {
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.log-action.action-success {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.log-action.action-danger {
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+.log-action.action-info {
+    background: var(--info-bg);
+    color: var(--info);
+}
+
+.log-action.action-default {
+    background: var(--bg-light);
+    color: var(--text-secondary);
+}
+
+.log-user {
+    color: var(--text-secondary);
+}
+
+.log-role {
+    color: var(--text-muted);
+}
+
+.log-time {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .filters-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        flex-wrap: wrap;
+    }
+
+    .log-item {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 16px;
+    }
+
+    .log-time {
+        width: 100%;
+        margin-left: 52px;
+    }
+}

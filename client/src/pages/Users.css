@@ -1,0 +1,97 @@
+.users-page {
+    max-width: 1200px;
+}
+
+/* User Cell */
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.user-name {
+    font-weight: 500;
+}
+
+/* Role Badge */
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.role-admin {
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+.role-operations {
+    background: var(--info-bg);
+    color: var(--info);
+}
+
+.role-sales_agent {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+/* Status Dot */
+.status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+}
+
+.status-dot::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-dot.active::before {
+    background: var(--success);
+}
+
+.status-dot.inactive::before {
+    background: var(--text-muted);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+.text-danger {
+    color: var(--danger);
+}
+
+/* Form Error Banner */
+.form-error-banner {
+    background: var(--danger-bg);
+    color: var(--danger);
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+}
+
+/* Modal styles are shared from Approvals.css */
